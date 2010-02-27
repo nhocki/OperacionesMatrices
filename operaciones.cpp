@@ -6,9 +6,6 @@
  **/
 
 #include <cstdio>
-#include <iostream>
-
-using namespace std;
 
 /**
  * Suma la matriz A y la matriz B. El resultado se almacena en la matriz Respuesta
