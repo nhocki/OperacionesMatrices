@@ -1,8 +1,8 @@
 /**
  * Avance #1 
  *   Juan Felipe Arango
- *   Nicolás Hock Isaza
- *   Alejandro Peláez Roldán
+ *   Nicolas Hock Isaza
+ *   Alejandro Pelaez Roldan
  **/
 
 #include <cstdio>
@@ -39,7 +39,7 @@ int resta(int n, int m, float *a[], float *b[], float **&respuesta){
 
 /**
  * Se multiplica la matriz A por el real C. El resultado es almacenado en la matriz Respuesta
- * La multiplicación por escalar de una matriz, cA = B, se define como B(i,j) = c * A(i,j)
+ * La multiplicaciï¿½n por escalar de una matriz, cA = B, se define como B(i,j) = c * A(i,j)
  **/
 int smultiplicacion(int n, int m, float c, float *a[], float **&respuesta){
     respuesta = new float*[n];
@@ -56,8 +56,8 @@ int smultiplicacion(int n, int m, float c, float *a[], float **&respuesta){
 /**
  * Se multiplican (si se puede) las matrices A(na x ma) y B(nb x mb).
  * Se verifica que las matrices se puedan multiplicar. 
- * La multiplicación de dos matrices es válida si el número de columnas de la primera es igual el número de filas de la segunda.
- * La multiplicación AxB=C se define como C(i,k) = A(i,j)*B(j,k)
+ * La multiplicaciï¿½n de dos matrices es vï¿½lida si el nï¿½mero de columnas de la primera es igual el nï¿½mero de filas de la segunda.
+ * La multiplicaciï¿½n AxB=C se define como C(i,k) = A(i,j)*B(j,k)
  **/
 
 int multiplicacion(int na, int ma, int nb, int mb, float *a[], float *b[], float **&respuesta){
