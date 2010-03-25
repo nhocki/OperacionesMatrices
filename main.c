@@ -3,8 +3,9 @@
 
 extern void suma();
 extern void resta();
-extern void smultiplicacion(int,int,float,void*,void*);
+extern void smultiplicacion(int,int,float,float(*)[],float(*)[]);
 extern void transpuesta();
+extern void multiplicacion();
 
 void main(){
     const n = 3;
@@ -14,6 +15,7 @@ void main(){
     float b[n][m];
     float c[n][m];
     float cc[m][n];
+    float d[n][n];
     float s = 2.57886;
 
     float k = 0.1;
@@ -45,6 +47,14 @@ void main(){
     for(i = 0; i < m; ++i){
         for(j = 0; j < n; ++j)
             printf("%f, ", cc[i][j]);
+        printf("\n");
+    }
+
+    multiplicacion(n,m,m,n,c,cc,d);
+    printf("\nMultiplicacion:\n");
+    for(i = 0; i < n; ++i){
+        for(j = 0; j < n; ++j)
+            printf("%f, ", d[i][j]);
         printf("\n");
     }
 }
