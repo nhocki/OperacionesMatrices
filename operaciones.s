@@ -13,6 +13,8 @@ section .text
 	global smultiplicacion
 	global transpuesta
 	global multiplicacion
+
+	
 	;; Funcion que suma dos matrices
 	;; La firma de la funcion en C seria
 	;; void(int numN, int numM, float A[], float B[], float *C)
@@ -23,24 +25,25 @@ section .text
 suma:
 	push 	ebp
 	mov 	ebp, esp
-	mov  	edx, 0
+	mov  	edx, 0		;make it 0 before the mult
 	mov	eax, 1	    	;eax = 1
 	mul	dword[numN]     ;eax = eax*numN
-	mov 	edx, 0
+	mov 	edx, 0		;make it 0 again!
 	mul     dword[numM]	;eax = eax*numM
-	mov     ebx, dword[A]	;current element of A
-	mov     ecx, dword[B]	;current element of B
-	mov     edx, dword[C]	;current element of C
+	mov	edx, eax	;edx is the counter
+	mov     eax, dword[A]	;current element of A
+	mov     ebx, dword[B]	;current element of B
+	mov     ecx, dword[C]	;current element of C
 ciclosuma:	
-	cmp	eax, 0
-	je	finsuma		    ;if eax > 0 continue
-	fld	dword[ebx]	    ;st0 = a[i]
-	fadd	dword[ecx]	    ;st0 = a[i] + b[i]
-	fstp	dword[edx]	    ;c[i] = st0
-	add 	ebx, 4		    ;next element of A
-	add 	ecx, 4		    ;next element of B
-	add 	edx, 4		    ;next element of C
-	dec 	eax
+	cmp	edx, 0
+	jge	finsuma		    ;if edx >= 0 continue
+	fld	dword[eax]	    ;st0 = a[i]
+	fadd	dword[ebx]	    ;st0 = a[i] + b[i]
+	fstp	dword[ecx]	    ;c[i] = st0
+	add 	eax, 4		    ;next element of A
+	add 	ebx, 4		    ;next element of B
+	add 	ecx, 4		    ;next element of C
+	dec 	edx		    ;edx--
 	jmp 	ciclosuma
 finsuma:
 	leave
@@ -61,19 +64,20 @@ resta:
 	mul	dword[numN]	;eax = eax*numN
 	mov 	edx, 0
 	mul	dword[numM]	;eax = eax*numM
-	mov	ebx, dword[A]	;current element of A
-	mov	ecx, dword[B]	;current element of B
-	mov	edx, dword[C]	;current element of C
+	mov	edx, eax	;edx is the counter
+	mov	eax, dword[A]	;current element of A
+	mov	ebx, dword[B]	;current element of B
+	mov	ecx, dword[C]	;current element of C
 cicloresta:	
-	cmp	eax, 0
-	je      finresta	    ;if eax > 0 continue
-	fld     dword[ebx]	    ;st0 = a[i]
-	fsub	dword[ecx]	    ;st0 = a[i] - b[i]
-	fstp	dword[edx]	    ;c[i] = st0
-	add 	ebx, 4		    ;next element of A
-	add 	ecx, 4		    ;next element of B
-	add 	edx, 4		    ;next element of C
-	dec 	eax
+	cmp	edx, 0
+	jge     finresta	    ;if eax > 0 continue
+	fld     dword[eax]	    ;st0 = a[i]
+	fsub	dword[ebx]	    ;st0 = a[i] - b[i]
+	fstp	dword[ecx]	    ;c[i] = st0
+	add 	eax, 4		    ;next element of A
+	add 	ebx, 4		    ;next element of B
+	add 	ecx, 4		    ;next element of C
+	dec 	edx		    ;edx--
 	jmp 	cicloresta
 finresta:
 	leave
@@ -94,21 +98,21 @@ smultiplicacion:
 	mul   	dword[numN]	;eax = eax*numN
 	mov	edx, 0
 	mul   	dword[numM]	;eax = eax*numM
-	mov    	ecx, dword[B]	;current element of B
-	mov    	edx, dword[C]	;current element of C
-	fld    	dword[ebp+16]   ;load the scalar
+	mov    	ebx, dword[B]	;current element of B
+	mov    	ecx, dword[C]	;current element of C
+	fld    	dword[ebp+16]   ;load the scalar. st0 = scalar
 ciclosmul:	
-	cmp    	eax, 0
-	je 	finsmul	        ;if eax > 0 continue
-	fld    	dword[ecx]	    ;st0 = b[i]
-	fmul	st1	            ;st0 = b[i]*st1(=s)
-	fstp	dword[edx]	    ;c[i] = st0
-	add 	ecx, 4		    ;next element of B 
-	add 	edx, 4		    ;next element of C
-	dec 	eax
+	cmp    	eax, 0		;eax is the counter!
+	jge 	finsmul		;if eax > 0 continue
+	fld    	dword[ebx]	;st0 = b[i]. st1 = scalar
+	fmul	st1	        ;st0 = b[i]*st1
+	fstp	dword[ecx]	;c[i] = st0. st0 = scalar
+	add 	ebx, 4		;next element of B 
+	add 	ecx, 4		;next element of C
+	dec 	eax		;eax--
 	jmp 	ciclosmul
 finsmul:
-	fstp    	st0             ;clear the stack
+	fstp    	st0     ;clear the stack. Remember that the scalar was in st0
 	leave
 	ret
 
@@ -122,13 +126,13 @@ transpuesta:
 	push    ebp
 	mov     ebp, esp
 	sub     esp, 8
-	mov	dword[i], 0
-	mov     dword[j], 0
+	mov	dword[i], 0	;i = 0
+	mov     dword[j], 0	;j = 0
 ciclo1:
 	mov     eax, dword[numN]
 	cmp     dword[i], eax       ;i < numN?
 	jge     finciclo1           ;jump if i >= numN
-	mov     dword[j], 0
+	mov     dword[j], 0	    ;j=0. Starting second cicle
 ciclo2:
 	mov     eax, dword[numM]
 	cmp     dword[j], eax       ;j < numM?
@@ -136,25 +140,25 @@ ciclo2:
 	mov     eax, dword[i]       ;eax = i
 	mov     edx, 0
 	mul     dword[numM]         ;eax = i*numM
-	add     eax, dword[j]       ;eax = i*numM + j
-	mov     ebx, 4
+	add     eax, dword[j]       ;eax = i*numM + j. This is the elment index
+	mov     ebx, 4		    ;each element of the matrix is 4bytes long
 	mov     edx, 0
-	mul     ebx                 ;eax = 4*(i*numM + j)
-	mov     ebx, eax
+	mul     ebx		    ;eax = 4*(i*numM + j). Remember each element is 4bytes long!
+	mov     ebx, eax	    ;ebx now has the value you need to 'jump' from the matrix direction to the element direction
 	mov     eax, dword[j]       ;eax = j
 	mov     edx, 0
 	mul     dword[numN]         ;eax = j*numN
 	add     eax, dword[i]       ;eax = j*numN + i
-	mov     ecx, 4
+	mov     ecx, 4		    ;each element of the matrix is 4bytes long
 	mov     edx, 0
 	mul     ecx                 ;eax = 4*(j*numN + i)
-	mov     ecx, eax
-	mov     eax, dword[A]
-	add     ebx, eax
-	mov     edx, dword[ebx]
-	mov     eax, dword[B]
-	add     ecx, eax
-	mov     dword[ecx], edx
+	mov     ecx, eax	    ;ecx ebx now has the value you need to 'jump' from the transposed matrix direction to the element direction
+	mov     eax, dword[A]	    ;eax points to the matrix A
+	add     ebx, eax	    ;ebx now points to A[i]
+	mov     edx, dword[ebx]	    ;edx now have the VALUE of A[i]
+	mov     eax, dword[B]	    ;eax points to the transposed matrix A'
+	add     ecx, eax	    ;ecx now points to A'[i]
+	mov     dword[ecx], edx	    ;transpose the element! Store it in the other matrix
 	inc     dword[j]            ;++j
 	jmp     ciclo2
 finciclo2:
