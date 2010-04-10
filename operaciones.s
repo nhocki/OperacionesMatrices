@@ -7,14 +7,6 @@
 %define j       ebp-8
 %define k	ebp-12
     
-section .text
-    	global suma
-	global resta
-	global smultiplicacion
-	global transpuesta
-	global multiplicacion
-
-	
 	;; Funcion que suma dos matrices
 	;; La firma de la funcion en C seria
 	;; void(int numN, int numM, float A[], float B[], float *C)
@@ -22,30 +14,32 @@ section .text
 	;; A, B, C sean inicializados de la siguiente manera (en C)
 	;; float A[numN][numM], foat B[numN][numM], float C[numN][numM]
 	;; El resultado es almacenado en la matriz C.
-suma:
+	;; Retorna 0 si no hubo error
+global suma:
+	suma:
 	push 	ebp
 	mov 	ebp, esp
-	mov  	edx, 0		;make it 0 before the mult
+	mov  	edx, 0
 	mov	eax, 1	    	;eax = 1
 	mul	dword[numN]     ;eax = eax*numN
-	mov 	edx, 0		;make it 0 again!
+	mov 	edx, 0
 	mul     dword[numM]	;eax = eax*numM
-	mov	edx, eax	;edx is the counter
-	mov     eax, dword[A]	;current element of A
-	mov     ebx, dword[B]	;current element of B
-	mov     ecx, dword[C]	;current element of C
+	mov     ebx, dword[A]	;current element of A
+	mov     ecx, dword[B]	;current element of B
+	mov     edx, dword[C]	;current element of C
 ciclosuma:	
-	cmp	edx, 0
-	jge	finsuma		    ;if edx >= 0 continue
-	fld	dword[eax]	    ;st0 = a[i]
-	fadd	dword[ebx]	    ;st0 = a[i] + b[i]
-	fstp	dword[ecx]	    ;c[i] = st0
-	add 	eax, 4		    ;next element of A
-	add 	ebx, 4		    ;next element of B
-	add 	ecx, 4		    ;next element of C
-	dec 	edx		    ;edx--
+	cmp	eax, 0
+	je	finsuma		    ;if eax > 0 continue
+	fld	dword[ebx]	    ;st0 = a[i]
+	fadd	dword[ecx]	    ;st0 = a[i] + b[i]
+	fstp	dword[edx]	    ;c[i] = st0
+	add 	ebx, 4		    ;next element of A
+	add 	ecx, 4		    ;next element of B
+	add 	edx, 4		    ;next element of C
+	dec 	eax
 	jmp 	ciclosuma
 finsuma:
+	mov 	eax, 0		;todo estuvo bien
 	leave
 	ret
 
@@ -56,7 +50,9 @@ finsuma:
 	;; A, B, C sean inicializados de la siguiente manera (en C)
 	;; float A[numN][numM], float B[numN][numM], float C[numN][numM]
 	;; El resultado es almacenado en la matriz C.
-resta:
+	;; Retorna 0 si todo estuvo bien.
+global resta:
+	resta:
 	push 	ebp
 	mov 	ebp, esp
 	mov     edx, 0
@@ -64,33 +60,35 @@ resta:
 	mul	dword[numN]	;eax = eax*numN
 	mov 	edx, 0
 	mul	dword[numM]	;eax = eax*numM
-	mov	edx, eax	;edx is the counter
-	mov	eax, dword[A]	;current element of A
-	mov	ebx, dword[B]	;current element of B
-	mov	ecx, dword[C]	;current element of C
+	mov	ebx, dword[A]	;current element of A
+	mov	ecx, dword[B]	;current element of B
+	mov	edx, dword[C]	;current element of C
 cicloresta:	
-	cmp	edx, 0
-	jge     finresta	    ;if eax > 0 continue
-	fld     dword[eax]	    ;st0 = a[i]
-	fsub	dword[ebx]	    ;st0 = a[i] - b[i]
-	fstp	dword[ecx]	    ;c[i] = st0
-	add 	eax, 4		    ;next element of A
-	add 	ebx, 4		    ;next element of B
-	add 	ecx, 4		    ;next element of C
-	dec 	edx		    ;edx--
+	cmp	eax, 0
+	je      finresta	    ;if eax > 0 continue
+	fld     dword[ebx]	    ;st0 = a[i]
+	fsub	dword[ecx]	    ;st0 = a[i] - b[i]
+	fstp	dword[edx]	    ;c[i] = st0
+	add 	ebx, 4		    ;next element of A
+	add 	ecx, 4		    ;next element of B
+	add 	edx, 4		    ;next element of C
+	dec 	eax
 	jmp 	cicloresta
 finresta:
+	mov 	eax, 0		;todo estuvo bien
 	leave
 	ret
 
-    ;; Funcion que multiplica una matriz por un escalar.
-    ;; La firma de la funcion en C seria
-    ;; void smultiplicacion(int numN,int numM,float s,float B[],float *C)
-    ;; Las matrices B y C deben ser inicializadas de la siguiete manera
-    ;; antes de llamar a la funcion.
-    ;; float B[numN][numM] y float C[numN][numM]
-    ;; la respuesta se guarda en C.
-smultiplicacion:
+	;; Funcion que multiplica una matriz por un escalar.
+	;; La firma de la funcion en C seria
+	;; void smultiplicacion(int numN,int numM,float s,float B[],float *C)
+	;; Las matrices B y C deben ser inicializadas de la siguiete manera
+	;; antes de llamar a la funcion.
+	;; float B[numN][numM] y float C[numN][numM]
+	;; la respuesta se guarda en C.
+	;; Retorna 0 si todo estuvo bien. 
+global smultiplicacion:
+	smultiplicacion:
 	push 	ebp
 	mov	ebp, esp
 	mov	edx, 0
@@ -98,41 +96,44 @@ smultiplicacion:
 	mul   	dword[numN]	;eax = eax*numN
 	mov	edx, 0
 	mul   	dword[numM]	;eax = eax*numM
-	mov    	ebx, dword[B]	;current element of B
-	mov    	ecx, dword[C]	;current element of C
-	fld    	dword[ebp+16]   ;load the scalar. st0 = scalar
+	mov    	ecx, dword[B]	;current element of B
+	mov    	edx, dword[C]	;current element of C
+	fld    	dword[ebp+16]   ;load the scalar
 ciclosmul:	
-	cmp    	eax, 0		;eax is the counter!
-	jge 	finsmul		;if eax > 0 continue
-	fld    	dword[ebx]	;st0 = b[i]. st1 = scalar
-	fmul	st1	        ;st0 = b[i]*st1
-	fstp	dword[ecx]	;c[i] = st0. st0 = scalar
-	add 	ebx, 4		;next element of B 
-	add 	ecx, 4		;next element of C
-	dec 	eax		;eax--
+	cmp    	eax, 0
+	je 	finsmul	        ;if eax > 0 continue
+	fld    	dword[ecx]	    ;st0 = b[i]
+	fmul	st1	            ;st0 = b[i]*st1(=s)
+	fstp	dword[edx]	    ;c[i] = st0
+	add 	ecx, 4		    ;next element of B 
+	add 	edx, 4		    ;next element of C
+	dec 	eax
 	jmp 	ciclosmul
 finsmul:
-	fstp    	st0     ;clear the stack. Remember that the scalar was in st0
+	fstp    st0             ;clear the stack
+	mov	eax, 0			;todo estuvo bien
 	leave
 	ret
 
-    ;; Funcion que halla la transpuesta de la matriz dada.
-    ;; La firma de la función en C seria.
-    ;; void transpuesta(int numN, int numM, float A[], float *B)
-    ;; Las matrices deben ser inicializadas de la siguiente manera.
-    ;; float A[numN][numM] y float B[numM][numN].
-    ;; La respuesta queda gurdada en la matriz C.
-transpuesta:
+	;; Funcion que halla la transpuesta de la matriz dada.
+	;; La firma de la función en C seria.
+	;; void transpuesta(int numN, int numM, float A[], float *B)
+	;; Las matrices deben ser inicializadas de la siguiente manera.
+	;; float A[numN][numM] y float B[numM][numN].
+	;; La respuesta queda gurdada en la matriz C.
+	;; Retorna 0 si todo estuvo bien.
+global transpuesta:
+transpuesta:	
 	push    ebp
 	mov     ebp, esp
 	sub     esp, 8
-	mov	dword[i], 0	;i = 0
-	mov     dword[j], 0	;j = 0
+	mov	dword[i], 0
+	mov     dword[j], 0
 ciclo1:
 	mov     eax, dword[numN]
 	cmp     dword[i], eax       ;i < numN?
 	jge     finciclo1           ;jump if i >= numN
-	mov     dword[j], 0	    ;j=0. Starting second cicle
+	mov     dword[j], 0
 ciclo2:
 	mov     eax, dword[numM]
 	cmp     dword[j], eax       ;j < numM?
@@ -140,47 +141,51 @@ ciclo2:
 	mov     eax, dword[i]       ;eax = i
 	mov     edx, 0
 	mul     dword[numM]         ;eax = i*numM
-	add     eax, dword[j]       ;eax = i*numM + j. This is the elment index
-	mov     ebx, 4		    ;each element of the matrix is 4bytes long
+	add     eax, dword[j]       ;eax = i*numM + j
+	mov     ebx, 4
 	mov     edx, 0
-	mul     ebx		    ;eax = 4*(i*numM + j). Remember each element is 4bytes long!
-	mov     ebx, eax	    ;ebx now has the value you need to 'jump' from the matrix direction to the element direction
+	mul     ebx                 ;eax = 4*(i*numM + j)
+	mov     ebx, eax
 	mov     eax, dword[j]       ;eax = j
 	mov     edx, 0
 	mul     dword[numN]         ;eax = j*numN
 	add     eax, dword[i]       ;eax = j*numN + i
-	mov     ecx, 4		    ;each element of the matrix is 4bytes long
+	mov     ecx, 4
 	mov     edx, 0
 	mul     ecx                 ;eax = 4*(j*numN + i)
-	mov     ecx, eax	    ;ecx ebx now has the value you need to 'jump' from the transposed matrix direction to the element direction
-	mov     eax, dword[A]	    ;eax points to the matrix A
-	add     ebx, eax	    ;ebx now points to A[i]
-	mov     edx, dword[ebx]	    ;edx now have the VALUE of A[i]
-	mov     eax, dword[B]	    ;eax points to the transposed matrix A'
-	add     ecx, eax	    ;ecx now points to A'[i]
-	mov     dword[ecx], edx	    ;transpose the element! Store it in the other matrix
+	mov     ecx, eax
+	mov     eax, dword[A]
+	add     ebx, eax
+	mov     edx, dword[ebx]
+	mov     eax, dword[B]
+	add     ecx, eax
+	mov     dword[ecx], edx
 	inc     dword[j]            ;++j
 	jmp     ciclo2
 finciclo2:
 	inc     dword[i]            ;++i
 	jmp     ciclo1
 finciclo1:
+	mov 	eax, 0		;todo estuvo bien
 	leave
 	ret
 
-    ;; Funcion que multiplica dos matrices
-    ;; La firma de la funcion en C seria
-    ;; void(int numNA, int numMA, int numNB, int numMB, float A[], float B[], float *C)
-    ;; se necesita que para llamar la función los arreglos
-    ;; A, B, C sean inicializados de la siguiente manera (en C)
-    ;; float A[numNA][numMA], foat B[numNB][numMB], float C[numNA][numMB]
-    ;; El resultado es almacenado en la matriz C.
+    	;; Funcion que multiplica dos matrices
+    	;; La firma de la funcion en C seria
+    	;; void(int numNA, int numMA, int numNB, int numMB, float A[], float B[], float *C)
+    	;; se necesita que para llamar la función los arreglos
+    	;; A, B, C sean inicializados de la siguiente manera (en C)
+    	;; float A[numNA][numMA], foat B[numNB][numMB], float C[numNA][numMB]
+    	;; El resultado es almacenado en la matriz C.
+	;; La funcion retorna 0 si los tamaños de las matrices son compatibles.
+    	;; Retorna 1 si los tamaños son incompatibles. 
 %define numNA	ebp+8
 %define numMA	ebp+12
 %define numNB	ebp+16
 %define numMB	ebp+20
 %define temp	ebp-16
-multiplicacion:
+global multiplicacion:
+multiplicacion:	
 	push 	ebp
 	mov	ebp, esp
 	mov	ebx, dword[ebp+24] 	;Base element of A
@@ -190,6 +195,11 @@ multiplicacion:
 	mov	dword[i], 0
 	mov	dword[j], 0
 	mov	dword[k], 0
+    	mov	eax, dword[numMA] 	;eax = MA
+    	cmp	eax, dword[numNB]	;MA == NB?
+    	je	ciclom1			;Jump if MA == NB
+    	mov	eax, 1			;Los tamaños fueron incompatibles
+    	jmp 	fin_mult		;Quit
 ciclom1:
     	mov	eax, dword[i]		;eax = i
     	cmp	eax, dword[numNA]	;i < NA?
@@ -234,6 +244,8 @@ fin_ciclom3:
 fin_ciclom2:
     	inc	dword[i]		;++i
     	jmp	ciclom1
-fin_ciclom1:	
+fin_ciclom1:
+    	mov	eax, 0			;Los tamaños fueron comptaibles
+fin_mult:   
 	leave
 	ret
